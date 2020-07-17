@@ -2,6 +2,9 @@ package club.rarlab.classicplugin
 
 import org.bukkit.plugin.java.JavaPlugin
 
+/**
+ * Abstract class to handle main classes.
+ */
 abstract class ClassicPlugin : JavaPlugin() {
     /**
      * [LoadContext] instance.

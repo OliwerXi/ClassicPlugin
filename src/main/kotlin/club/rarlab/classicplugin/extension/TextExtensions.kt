@@ -1,4 +1,4 @@
-package club.rarlab.classicplugin.extensions
+package club.rarlab.classicplugin.extension
 
 import org.apache.commons.lang.WordUtils
 import org.bukkit.ChatColor
