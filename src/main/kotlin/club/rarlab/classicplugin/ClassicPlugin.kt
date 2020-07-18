@@ -34,7 +34,7 @@ abstract class ClassicPlugin : JavaPlugin() {
     /**
      * Build a [LoadContext].
      */
-    internal fun buildContext(handle: LoadContextBuilder.() -> LoadContext): LoadContext = handle(LoadContextBuilder())
+    protected fun buildContext(handle: LoadContextBuilder.() -> LoadContext): LoadContext = handle(LoadContextBuilder())
 
     /**
      * Class to hold loading context data.
@@ -44,7 +44,7 @@ abstract class ClassicPlugin : JavaPlugin() {
     /**
      * Class to build the [LoadContext].
      */
-    inner class LoadContextBuilder internal constructor() {
+    protected inner class LoadContextBuilder internal constructor() {
         private var load = Runnable {}
         private var enable = Runnable {}
         private var disable = Runnable {}
