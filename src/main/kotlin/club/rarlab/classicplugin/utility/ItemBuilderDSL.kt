@@ -1,12 +1,12 @@
 package club.rarlab.classicplugin.utility
 
-import com.mojang.authlib.GameProfile
-import com.mojang.authlib.properties.Property
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SkullMeta
+import java.lang.reflect.Constructor
+import java.lang.reflect.Field
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -64,6 +64,25 @@ open class ItemBuilderDSL<T: ItemMeta>(var material: XMaterial = XMaterial.AIR) 
  */
 class SkullBuilderDSL : ItemBuilderDSL<SkullMeta>(XMaterial.PLAYER_HEAD) {
     /**
+     * Static stuff.
+     */
+    companion object {
+        private val gameProfile: Constructor<*> by lazy {
+            val clazz = Class.forName("com.mojang.authlib.GameProfile")
+            clazz.getConstructor(UUID::class.java, String::class.java)
+        }
+
+        private val property: Constructor<*> by lazy {
+            val clazz = Class.forName("com.mojang.authlib.properties.Property")
+            clazz.getConstructor(String::class.java, String::class.java)
+        }
+
+        private val properties: Field by lazy {
+            gameProfile::class.java.getDeclaredField("properties")
+        }
+    }
+
+    /**
      * Apply an owner to the [SkullMeta].
      */
     fun owner(name: String) = meta { this.owner = name }
@@ -71,12 +90,13 @@ class SkullBuilderDSL : ItemBuilderDSL<SkullMeta>(XMaterial.PLAYER_HEAD) {
     /**
      * Apply textures to the [SkullMeta].
      */
+    @Suppress("UNCHECKED_CAST")
     fun texture(base: String) {
-        val profile = GameProfile(UUID.randomUUID(), null)
-        val properties = profile.properties
+        val profile = gameProfile.newInstance(UUID.randomUUID(), null)
+        val properties = properties.get(profile) as MutableMap<Any, Any>
 
         val data = Base64.getEncoder().encode("{textures:{SKIN:{url:\"http://textures.minecraft.net/texture/%s\"}}}".format(base).toByteArray())
-        properties.put("textures", Property("textures", String(data)))
+        properties["textures"] = property.newInstance("textures", String(data))
 
         with (completedItem) {
             val profileField = itemMeta?.javaClass?.getDeclaredField("profile") ?: return@with
