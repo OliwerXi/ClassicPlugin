@@ -94,7 +94,9 @@ class SkullBuilderDSL internal constructor() {
      * Apply an owner to the [SkullMeta].
      */
     fun owner(name: String) {
-        (completedItem.itemMeta as SkullMeta?)?.owner = name
+        val skullMeta = completedItem.itemMeta as SkullMeta
+        skullMeta.owner = name
+        completedItem.itemMeta = skullMeta
     }
 
     /**
@@ -112,9 +114,11 @@ class SkullBuilderDSL internal constructor() {
         }
 
         with (completedItem) {
-            val profileField = itemMeta?.javaClass?.getDeclaredField("profile") ?: return@with
+            val newMeta = itemMeta
+            val profileField = newMeta?.javaClass?.getDeclaredField("profile") ?: return@with
             profileField.isAccessible = true
-            profileField.set(itemMeta, profile)
+            profileField.set(newMeta, profile)
+            itemMeta = newMeta
         }
     }
 
