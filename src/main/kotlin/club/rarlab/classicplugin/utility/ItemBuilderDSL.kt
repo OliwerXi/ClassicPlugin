@@ -7,6 +7,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SkullMeta
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
+import java.lang.reflect.Method
 import java.util.*
 import kotlin.collections.HashMap
 
@@ -75,13 +76,21 @@ class SkullBuilderDSL : ItemBuilderDSL<SkullMeta>(XMaterial.PLAYER_HEAD) {
             gameProfileClazz.getConstructor(UUID::class.java, String::class.java)
         }
 
+        private val propertyClazz: Class<*> by lazy {
+            Class.forName("com.mojang.authlib.properties.Property")
+        }
+
         private val property: Constructor<*> by lazy {
-            val clazz = Class.forName("com.mojang.authlib.properties.Property")
-            clazz.getConstructor(String::class.java, String::class.java)
+            propertyClazz.getConstructor(String::class.java, String::class.java)
         }
 
         private val properties: Field by lazy {
             gameProfileClazz.getDeclaredField("properties")
+        }
+
+        private val putProperty: Method by lazy {
+            val clazz = Class.forName("com.mojang.authlib.properties.PropertyMap")
+            clazz.getDeclaredMethod("put", String::class.java, propertyClazz)
         }
     }
 
@@ -96,13 +105,10 @@ class SkullBuilderDSL : ItemBuilderDSL<SkullMeta>(XMaterial.PLAYER_HEAD) {
     @Suppress("UNCHECKED_CAST")
     fun texture(base: String) {
         val profile = gameProfile.newInstance(UUID.randomUUID(), null)
-        val properties = properties.run {
-            isAccessible = true
-            get(profile) as MutableMap<Any, Any>
-        }
+        val properties = properties.run { isAccessible = true; get(profile) }
 
         val data = Base64.getEncoder().encode("{textures:{SKIN:{url:\"http://textures.minecraft.net/texture/%s\"}}}".format(base).toByteArray())
-        properties["textures"] = property.newInstance("textures", String(data))
+        putProperty(properties, "textures", property.newInstance("textures", String(data)))
 
         with (completedItem) {
             val profileField = itemMeta?.javaClass?.getDeclaredField("profile") ?: return@with
