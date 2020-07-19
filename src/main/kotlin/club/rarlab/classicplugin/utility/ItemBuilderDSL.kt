@@ -33,9 +33,9 @@ open class ItemBuilderDSL<T: ItemMeta>(var material: XMaterial = XMaterial.AIR) 
      * [T] to be applied to the [ItemStack].
      */
     @Suppress("UNCHECKED_CAST")
-    infix fun meta(handle: T.() -> Unit) {
+    infix fun meta(handle: T?.() -> Unit) {
         val itemMeta = completedItem.itemMeta
-        handle(itemMeta as T)
+        handle(itemMeta as T?)
         completedItem.itemMeta = itemMeta
     }
 
@@ -85,7 +85,7 @@ class SkullBuilderDSL : ItemBuilderDSL<SkullMeta>(XMaterial.PLAYER_HEAD) {
     /**
      * Apply an owner to the [SkullMeta].
      */
-    fun owner(name: String) = meta { this.owner = name }
+    fun owner(name: String) = meta { this?.owner = name }
 
     /**
      * Apply textures to the [SkullMeta].
