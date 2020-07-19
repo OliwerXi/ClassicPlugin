@@ -96,7 +96,10 @@ class SkullBuilderDSL : ItemBuilderDSL<SkullMeta>(XMaterial.PLAYER_HEAD) {
     @Suppress("UNCHECKED_CAST")
     fun texture(base: String) {
         val profile = gameProfile.newInstance(UUID.randomUUID(), null)
-        val properties = properties.get(profile) as MutableMap<Any, Any>
+        val properties = properties.run {
+            isAccessible = true
+            get(profile) as MutableMap<Any, Any>
+        }
 
         val data = Base64.getEncoder().encode("{textures:{SKIN:{url:\"http://textures.minecraft.net/texture/%s\"}}}".format(base).toByteArray())
         properties["textures"] = property.newInstance("textures", String(data))
