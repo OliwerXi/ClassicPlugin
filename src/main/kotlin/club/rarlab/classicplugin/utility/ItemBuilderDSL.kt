@@ -13,13 +13,13 @@ import java.util.*
 import kotlin.collections.HashMap
 
 /**
- * Base class to handle item builders.
+ * Class to handle the Item Builder.
  */
-open class ItemBuilderDSL<T: ItemMeta>(var material: XMaterial = XMaterial.AIR) {
+class ItemBuilderDSL(var material: XMaterial = XMaterial.AIR) {
     /**
      * [ItemStack] to be built.
      */
-    internal val completedItem: ItemStack = ItemStack(Material.AIR)
+    private val completedItem: ItemStack = ItemStack(Material.AIR)
 
     /**
      * [Int] amount to be applied.
@@ -32,23 +32,13 @@ open class ItemBuilderDSL<T: ItemMeta>(var material: XMaterial = XMaterial.AIR) 
     var enchantments: HashMap<Enchantment, Int> = hashMapOf()
 
     /**
-     * [T] to be applied to the [ItemStack].
+     * [ItemMeta] to be applied to the [ItemStack].
      */
     @Suppress("UNCHECKED_CAST")
-    infix fun meta(handle: T?.() -> Unit) {
+    infix fun meta(handle: ItemMeta?.() -> Unit) {
         val itemMeta = completedItem.itemMeta
-        handle(itemMeta as T?)
+        handle(itemMeta)
         completedItem.itemMeta = itemMeta
-    }
-
-    /**
-     * Apply skull modifications to the item.
-     */
-    infix fun skull(handle: SkullBuilderDSL.() -> Unit) = with (completedItem) {
-        val skullBuilder = SkullBuilderDSL()
-        skullBuilder.applyMeta(itemMeta)
-        skullBuilder.handle()
-        itemMeta = skullBuilder.finish()
     }
 
     /**
@@ -64,7 +54,12 @@ open class ItemBuilderDSL<T: ItemMeta>(var material: XMaterial = XMaterial.AIR) 
 /**
  * Class to handle the skull builder.
  */
-class SkullBuilderDSL : ItemBuilderDSL<SkullMeta>(XMaterial.PLAYER_HEAD) {
+class SkullBuilderDSL internal constructor() {
+    /**
+     * [ItemStack] to be built.
+     */
+    private val completedItem = XMaterial.PLAYER_HEAD.toItem()!!
+
     /**
      * Static stuff.
      */
@@ -98,7 +93,9 @@ class SkullBuilderDSL : ItemBuilderDSL<SkullMeta>(XMaterial.PLAYER_HEAD) {
     /**
      * Apply an owner to the [SkullMeta].
      */
-    fun owner(name: String) = meta { this?.owner = name }
+    fun owner(name: String) {
+        (completedItem.itemMeta as SkullMeta?)?.owner = name
+    }
 
     /**
      * Apply textures to the [SkullMeta].
@@ -122,23 +119,35 @@ class SkullBuilderDSL : ItemBuilderDSL<SkullMeta>(XMaterial.PLAYER_HEAD) {
     }
 
     /**
-     * Apply an [ItemMeta] to the [ItemStack].
+     * [ItemMeta] to be applied to the [ItemStack].
      */
-    fun applyMeta(meta: ItemMeta?) {
-        completedItem.itemMeta = meta
+    @Suppress("UNCHECKED_CAST")
+    infix fun meta(handle: ItemMeta?.() -> Unit) {
+        val itemMeta = completedItem.itemMeta
+        handle(itemMeta)
+        completedItem.itemMeta = itemMeta
     }
 
     /**
-     * Finish the build and fetch the [ItemMeta].
+     * Fetch the [ItemStack].
      */
-    fun finish(): ItemMeta? = this.completedItem.itemMeta
+    fun complete(): ItemStack = this.completedItem
 }
 
 /**
  * Build an [ItemStack].
  */
-fun buildItem(handle: ItemBuilderDSL<ItemMeta>.() -> Unit): ItemStack {
-    val builder = ItemBuilderDSL<ItemMeta>()
+fun buildItem(handle: ItemBuilderDSL.() -> Unit): ItemStack {
+    val builder = ItemBuilderDSL()
+    builder.handle()
+    return builder.complete()
+}
+
+/**
+ * Build a skull.
+ */
+fun buildSkull(handle: SkullBuilderDSL.() -> Unit): ItemStack {
+    val builder = SkullBuilderDSL()
     builder.handle()
     return builder.complete()
 }
