@@ -67,9 +67,12 @@ class SkullBuilderDSL : ItemBuilderDSL<SkullMeta>(XMaterial.PLAYER_HEAD) {
      * Static stuff.
      */
     companion object {
+        private val gameProfileClazz: Class<*> by lazy {
+            Class.forName("com.mojang.authlib.GameProfile")
+        }
+
         private val gameProfile: Constructor<*> by lazy {
-            val clazz = Class.forName("com.mojang.authlib.GameProfile")
-            clazz.getConstructor(UUID::class.java, String::class.java)
+            gameProfileClazz.getConstructor(UUID::class.java, String::class.java)
         }
 
         private val property: Constructor<*> by lazy {
@@ -78,7 +81,7 @@ class SkullBuilderDSL : ItemBuilderDSL<SkullMeta>(XMaterial.PLAYER_HEAD) {
         }
 
         private val properties: Field by lazy {
-            gameProfile::class.java.getDeclaredField("properties")
+            gameProfileClazz.getDeclaredField("properties")
         }
     }
 
