@@ -109,7 +109,10 @@ class SkullBuilderDSL : ItemBuilderDSL<SkullMeta>(XMaterial.PLAYER_HEAD) {
         val properties = properties.run { isAccessible = true; get(profile) }
 
         val data = Base64.getEncoder().encode("{textures:{SKIN:{url:\"http://textures.minecraft.net/texture/%s\"}}}".format(base).toByteArray())
-        (mapProperties[properties] as Multimap<Any, Any>).put("textures", property.newInstance("textures", String(data)))
+        mapProperties.run {
+            isAccessible = true
+            (this[properties] as Multimap<Any, Any>).put("textures", property.newInstance("textures", String(data)))
+        }
 
         with (completedItem) {
             val profileField = itemMeta?.javaClass?.getDeclaredField("profile") ?: return@with
