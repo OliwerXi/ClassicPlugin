@@ -17,11 +17,6 @@ abstract class ClassicPlugin : JavaPlugin() {
     abstract fun load(): LoadContext
 
     /**
-     * Base onLoad.
-     */
-    override fun onLoad() = context.load.run()
-
-    /**
      * Base onEnable.
      */
     override fun onEnable() = context.enable.run()
@@ -39,22 +34,14 @@ abstract class ClassicPlugin : JavaPlugin() {
     /**
      * Class to hold loading context data.
      */
-    data class LoadContext internal constructor(val load: Runnable, val enable: Runnable, val disable: Runnable)
+    data class LoadContext internal constructor(val enable: Runnable, val disable: Runnable)
 
     /**
      * Class to build the [LoadContext].
      */
     protected inner class LoadContextBuilder internal constructor() {
-        private var load = Runnable {}
         private var enable = Runnable {}
         private var disable = Runnable {}
-
-        /**
-         * Apply a runnable for the load logic.
-         */
-        infix fun load(handle: Runnable.() -> Unit) {
-            load = Runnable {}.also(handle)
-        }
 
         /**
          * Apply a runnable for the enable logic.
@@ -73,6 +60,6 @@ abstract class ClassicPlugin : JavaPlugin() {
         /**
          * Finish and build the final [LoadContext].
          */
-        fun finish(): LoadContext = LoadContext(load, enable, disable)
+        fun finish(): LoadContext = LoadContext(enable, disable)
     }
 }
