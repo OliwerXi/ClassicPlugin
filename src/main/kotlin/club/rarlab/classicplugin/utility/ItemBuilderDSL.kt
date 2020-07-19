@@ -1,5 +1,6 @@
 package club.rarlab.classicplugin.utility
 
+import com.google.common.collect.Multimap
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
@@ -88,9 +89,9 @@ class SkullBuilderDSL : ItemBuilderDSL<SkullMeta>(XMaterial.PLAYER_HEAD) {
             gameProfileClazz.getDeclaredField("properties")
         }
 
-        private val putProperty: Method by lazy {
+        private val mapProperties: Field by lazy {
             val clazz = Class.forName("com.mojang.authlib.properties.PropertyMap")
-            clazz.getDeclaredMethod("put", String::class.java, propertyClazz)
+            clazz.getDeclaredField("properties")
         }
     }
 
@@ -108,7 +109,7 @@ class SkullBuilderDSL : ItemBuilderDSL<SkullMeta>(XMaterial.PLAYER_HEAD) {
         val properties = properties.run { isAccessible = true; get(profile) }
 
         val data = Base64.getEncoder().encode("{textures:{SKIN:{url:\"http://textures.minecraft.net/texture/%s\"}}}".format(base).toByteArray())
-        putProperty(properties, "textures", property.newInstance("textures", String(data)))
+        (mapProperties[properties] as Multimap<Any, Any>).put("textures", property.newInstance("textures", String(data)))
 
         with (completedItem) {
             val profileField = itemMeta?.javaClass?.getDeclaredField("profile") ?: return@with
