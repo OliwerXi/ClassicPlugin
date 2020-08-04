@@ -1,6 +1,5 @@
 package club.rarlab.classicplugin.utility
 
-import club.rarlab.classicplugin.ClassicPlugin
 import org.bukkit.Bukkit
 import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
@@ -24,7 +23,7 @@ class EventListener(private val listener: Event.() -> Unit) : EventExecutor, Lis
  */
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T : Event> JavaPlugin.listenTo(
-        plugin: Plugin = ClassicPlugin.INSTANCE,
+        plugin: Plugin,
         priority: EventPriority = EventPriority.NORMAL,
         noinline listener: T.() -> Unit
 ) = EventListener(listener as Event.() -> Unit).also {
