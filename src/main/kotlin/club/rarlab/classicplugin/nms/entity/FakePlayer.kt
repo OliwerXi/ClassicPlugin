@@ -173,7 +173,7 @@ class FakePlayer private constructor(val uuid: UUID, nameTag: String) {
         ).also { entity -> this.entity = entity }
 
         val bukkitTeam = scoreboard.registerNewTeam("roam_${player.name}")
-        name?.let { bukkitTeam.prefix = it }
+        name?.let { bukkitTeam.prefix = prefix }
         suffix?.let { bukkitTeam.suffix = it }
 
         val nmsScoreboard = get<Constructor<*>>(CONSTRUCTOR, "Scoreboard").newInstance()
