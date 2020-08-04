@@ -8,9 +8,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.SkullMeta
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
-import java.lang.reflect.Method
 import java.util.*
-import kotlin.collections.HashMap
 
 /**
  * Class to handle the Item Builder.

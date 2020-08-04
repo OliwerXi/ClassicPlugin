@@ -20,7 +20,9 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
 
     // Provided Dependencies
+    compileOnly(fileTree("$projectDir/libs/") { include("*.jar") })
     compileOnly("org.spigotmc:spigot-api:1.16.1-R0.1-SNAPSHOT")
+    compileOnly("io.netty:netty-all:4.1.51.Final")
 }
 
 val sourcesJar by tasks.creating(Jar::class) {
@@ -55,5 +57,9 @@ publishing {
 tasks {
     compileKotlin {
         kotlinOptions.jvmTarget = "1.8"
+    }
+
+    shadowJar {
+        minimize()
     }
 }
