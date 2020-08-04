@@ -6,6 +6,7 @@ import org.bukkit.event.Event
 import org.bukkit.event.EventPriority
 import org.bukkit.event.Listener
 import org.bukkit.plugin.EventExecutor
+import org.bukkit.plugin.Plugin
 import org.bukkit.plugin.java.JavaPlugin
 
 /**
@@ -23,8 +24,9 @@ class EventListener(private val listener: Event.() -> Unit) : EventExecutor, Lis
  */
 @Suppress("UNCHECKED_CAST")
 inline fun <reified T : Event> JavaPlugin.listenTo(
+        plugin: Plugin = ClassicPlugin.INSTANCE,
         priority: EventPriority = EventPriority.NORMAL,
         noinline listener: T.() -> Unit
 ) = EventListener(listener as Event.() -> Unit).also {
-    Bukkit.getPluginManager().registerEvent(T::class.java, it, priority, it, ClassicPlugin.INSTANCE)
+    Bukkit.getPluginManager().registerEvent(T::class.java, it, priority, it, plugin)
 }
