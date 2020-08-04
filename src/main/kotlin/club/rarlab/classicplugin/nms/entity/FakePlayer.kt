@@ -1,5 +1,6 @@
 package club.rarlab.classicplugin.nms.entity
 
+import club.rarlab.classicplugin.ClassicPlugin.Companion.INSTANCE
 import club.rarlab.classicplugin.extension.*
 import club.rarlab.classicplugin.nms.GlobalReflection.FetchType.*
 import club.rarlab.classicplugin.nms.GlobalReflection.get
@@ -13,6 +14,7 @@ import com.mojang.authlib.properties.Property
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
+import org.bukkit.plugin.Plugin
 import org.bukkit.scoreboard.Scoreboard
 import java.lang.reflect.Array
 import java.lang.reflect.Constructor
@@ -22,11 +24,11 @@ import java.util.*
 /**
  * [FakePlayer] used to create fake [Player]s.
  */
-class FakePlayer private constructor(val uuid: UUID, nameTag: String) {
+class FakePlayer private constructor(private val plugin: Plugin, val uuid: UUID, nameTag: String) {
     /**
      * [Any] built EntityPlayer object.
      */
-    private lateinit var entity: Any
+    private val entity: Any
 
     /**
      * [Array] of the single entity.
@@ -59,7 +61,6 @@ class FakePlayer private constructor(val uuid: UUID, nameTag: String) {
      * @param handle receiver to be handled.
      */
     infix fun equipment(handle: EquipmentBuilderDSL.() -> Unit) {
-        if (!this::entity.isInitialized) return
         val builder = EquipmentBuilderDSL()
         handle(builder)
         this.equipment = builder.complete()
@@ -71,7 +72,6 @@ class FakePlayer private constructor(val uuid: UUID, nameTag: String) {
      * @param texturesProperty [Property] of textures to be applied to the [FakePlayer].
      */
     fun applySkin(texturesProperty: Property) {
-        if (!this::entity.isInitialized) return
         val entityProfile = get<Method>(METHOD, "EntityHuman_getProfile").invoke(this.entity) as? GameProfile ?: return
         entityProfile.properties.put("textures", texturesProperty)
     }
@@ -92,7 +92,6 @@ class FakePlayer private constructor(val uuid: UUID, nameTag: String) {
      * @param location the [FakePlayer] should be 'teleported' to.
      */
     fun setLocation(location: Location) {
-        if (!this::entity.isInitialized) return
         val (x, y, z, yaw, pitch) = location
         get<Method>(METHOD, "Entity_setLocation").invoke(this.entity, x, y, z, yaw, pitch)
     }
@@ -107,16 +106,14 @@ class FakePlayer private constructor(val uuid: UUID, nameTag: String) {
      *
      * @param players array of [Player] to show to.
      */
-    fun showTo(vararg players: Player) {
-        if (!this::entity.isInitialized) return
-
+    fun showTo( vararg players: Player) {
         sendPacket(createPacket("PacketPlayOutPlayerInfo", getInfoAction("ADD_PLAYER"), this.entityArray), *players)
         sendPacket(createPacket("PacketPlayOutNamedEntitySpawn", this.entity), *players)
         equipment?.packets(getEntityId() ?: return)?.forEach { packet -> sendPacket(packet, *players) }
 
         players.forEach { player -> player.scoreboard = this.scoreboard }
         sendPacket(createPacket("PacketPlayOutScoreboardTeam", this.scoreboardTeam, listOf(this.middleName), 3), *players)
-        schedule(20, false, Runnable {
+        schedule(plugin, 20, false, Runnable {
             sendPacket(createPacket("PacketPlayOutPlayerInfo", getInfoAction("REMOVE_PLAYER"), this.entityArray), *players)
         })
     }
@@ -127,7 +124,6 @@ class FakePlayer private constructor(val uuid: UUID, nameTag: String) {
      * @param players array of [Player] to hide from.
      */
     fun hideFrom(vararg players: Player) {
-        if (!this::entity.isInitialized) return
         val entityId = getEntityId() ?: return
 
         sendPacket(createPacket("PacketPlayOutPlayerInfo", getInfoAction("REMOVE_PLAYER"), this.entityArray), *players)
@@ -140,7 +136,6 @@ class FakePlayer private constructor(val uuid: UUID, nameTag: String) {
      * @return [Int] corresponding ID if not null.
      */
     private fun getEntityId(): Int? {
-        if (!this::entity.isInitialized) return null
         return get<Method>(METHOD, "Entity_getId").invoke(this.entity) as? Int
     }
 
@@ -204,10 +199,11 @@ class FakePlayer private constructor(val uuid: UUID, nameTag: String) {
         /**
          * Generate a new [FakePlayer] by owner unique id and name tag.
          *
+         * @param plugin   [org.bukkit.plugin.java.JavaPlugin] instance.
          * @param uniqueId whom to be the owner of this [FakePlayer].
          * @param nameTag  to be set for the [FakePlayer].
          * @return [FakePlayer] corresponding fake player.
          */
-        fun generate(uniqueId: UUID, nameTag: String): FakePlayer = FakePlayer(uniqueId, nameTag)
+        fun generate(plugin: Plugin = INSTANCE, uniqueId: UUID, nameTag: String): FakePlayer = FakePlayer(plugin, uniqueId, nameTag)
     }
 }
