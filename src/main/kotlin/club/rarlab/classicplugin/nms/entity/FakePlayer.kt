@@ -1,6 +1,5 @@
 package club.rarlab.classicplugin.nms.entity
 
-import club.rarlab.classicplugin.ClassicPlugin.Companion.INSTANCE
 import club.rarlab.classicplugin.extension.*
 import club.rarlab.classicplugin.nms.GlobalReflection.FetchType.*
 import club.rarlab.classicplugin.nms.GlobalReflection.get
@@ -14,7 +13,6 @@ import com.mojang.authlib.properties.Property
 import org.bukkit.Bukkit
 import org.bukkit.Location
 import org.bukkit.entity.Player
-import org.bukkit.plugin.Plugin
 import org.bukkit.scoreboard.Scoreboard
 import java.lang.reflect.Array
 import java.lang.reflect.Constructor
@@ -24,7 +22,7 @@ import java.util.*
 /**
  * [FakePlayer] used to create fake [Player]s.
  */
-class FakePlayer private constructor(private val plugin: Plugin, val uuid: UUID, nameTag: String) {
+class FakePlayer private constructor(val uuid: UUID, nameTag: String) {
     /**
      * [Any] built EntityPlayer object.
      */
@@ -113,7 +111,7 @@ class FakePlayer private constructor(private val plugin: Plugin, val uuid: UUID,
 
         players.forEach { player -> player.scoreboard = this.scoreboard }
         sendPacket(createPacket("PacketPlayOutScoreboardTeam", this.scoreboardTeam, listOf(this.middleName), 3), *players)
-        schedule(plugin, 20, false, Runnable {
+        schedule(20, false, Runnable {
             sendPacket(createPacket("PacketPlayOutPlayerInfo", getInfoAction("REMOVE_PLAYER"), this.entityArray), *players)
         })
     }
@@ -175,7 +173,7 @@ class FakePlayer private constructor(private val plugin: Plugin, val uuid: UUID,
         ).also { entity -> this.entity = entity }
 
         val bukkitTeam = scoreboard.registerNewTeam("roam_${player.name}")
-        prefix?.let { bukkitTeam.prefix = it }
+        name?.let { bukkitTeam.prefix = it }
         suffix?.let { bukkitTeam.suffix = it }
 
         val nmsScoreboard = get<Constructor<*>>(CONSTRUCTOR, "Scoreboard").newInstance()
@@ -199,11 +197,10 @@ class FakePlayer private constructor(private val plugin: Plugin, val uuid: UUID,
         /**
          * Generate a new [FakePlayer] by owner unique id and name tag.
          *
-         * @param plugin   [org.bukkit.plugin.java.JavaPlugin] instance.
          * @param uniqueId whom to be the owner of this [FakePlayer].
          * @param nameTag  to be set for the [FakePlayer].
          * @return [FakePlayer] corresponding fake player.
          */
-        fun generate(plugin: Plugin = INSTANCE, uniqueId: UUID, nameTag: String): FakePlayer = FakePlayer(plugin, uniqueId, nameTag)
+        fun generate(uniqueId: UUID, nameTag: String): FakePlayer = FakePlayer(uniqueId, nameTag)
     }
 }

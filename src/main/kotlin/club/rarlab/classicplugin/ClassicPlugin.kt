@@ -28,7 +28,7 @@ abstract class ClassicPlugin : JavaPlugin() {
      * Base onEnable.
      */
     override fun onEnable() {
-        PLUGIN.instance = this
+        PLUGIN.setInstance(this)
         PLUGIN.titleWrapper = buildTitleWrapper()
         context.enable(Runnable {})
     }
@@ -90,9 +90,11 @@ abstract class ClassicPlugin : JavaPlugin() {
     /**
      * Mutable [ClassicPlugin] properties (private).
      */
-    private object PLUGIN {
-        lateinit var instance: Plugin
-        lateinit var titleWrapper: TitleWrapper
+    object PLUGIN {
+        internal lateinit var instance: Plugin
+        internal lateinit var titleWrapper: TitleWrapper
+
+        fun setInstance(instance: Plugin) { this.instance = instance }
     }
 
     /**
