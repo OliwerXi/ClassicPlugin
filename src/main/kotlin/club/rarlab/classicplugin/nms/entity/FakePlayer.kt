@@ -133,7 +133,7 @@ class FakePlayer private constructor(val uuid: UUID, nameTag: String) {
      *
      * @return [Int] corresponding ID if not null.
      */
-    private fun getEntityId(): Int? {
+    fun getEntityId(): Int? {
         return get<Method>(METHOD, "Entity_getId").invoke(this.entity) as? Int
     }
 
