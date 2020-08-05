@@ -5,6 +5,15 @@ import club.rarlab.classicplugin.task.SchedulerHelper.scheduleSync
 import org.bukkit.scheduler.BukkitTask
 
 /**
+ * Schedule sync or async task.
+ *
+ * @param async whether or not the task should be asynchronous.
+ * @param then  action to be triggered.
+ */
+fun schedule(async: Boolean = false, then: Runnable): BukkitTask =
+        if (!async) scheduleSync(then) else scheduleAsync(then)
+
+/**
  * Schedule sync or async delayed task.
  *
  * @param delay the delay to wait.

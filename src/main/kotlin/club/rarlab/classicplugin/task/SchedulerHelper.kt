@@ -15,6 +15,14 @@ object SchedulerHelper {
     private val scheduler: BukkitScheduler = Bukkit.getScheduler()
 
     /**
+     * Run a task synchronously.
+     *
+     * @param then action to be triggered.
+     */
+    fun scheduleSync(then: Runnable): BukkitTask = scheduler
+            .runTask(INSTANCE, then)
+
+    /**
      * Run a delayed task synchronously.
      *
      * @param delay the delay to wait.
@@ -32,6 +40,14 @@ object SchedulerHelper {
      */
     fun scheduleSync(delay: Long, period: Long, then: Runnable): BukkitTask = scheduler
             .runTaskTimer(INSTANCE, then, delay, period)
+
+    /**
+     * Run a task asynchronously.
+     *
+     * @param then action to be triggered.
+     */
+    fun scheduleAsync( then: Runnable): BukkitTask = scheduler
+            .runTaskAsynchronously(INSTANCE, then)
 
     /**
      * Run a delayed task asynchronously.
