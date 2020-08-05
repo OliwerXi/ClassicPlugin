@@ -5,6 +5,7 @@ import club.rarlab.classicplugin.nms.GlobalReflection.FetchType.METHOD
 import club.rarlab.classicplugin.nms.GlobalReflection.VERSION_NUMBER
 import club.rarlab.classicplugin.nms.GlobalReflection.get
 import club.rarlab.classicplugin.nms.ReflectionHelper.createPacket
+import org.bukkit.Material
 import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.ItemStack
 import java.lang.reflect.Method
@@ -40,11 +41,11 @@ data class Equipment(
      * @param id of the entity that shall be effected.
      */
     fun packets(id: Int): ArrayList<out Any> = arrayListOf<Any>().apply {
-        if (hand != null) this += createEquipmentPacket(id, "MAINHAND", hand)
-        if (helmet != null) this += createEquipmentPacket(id, "HEAD", helmet)
-        if (chestPlate != null) this += createEquipmentPacket(id, "CHEST", chestPlate)
-        if (leggings != null) this += createEquipmentPacket(id, "LEGS", leggings)
-        if (boots != null) this += createEquipmentPacket(id, "FEET", boots)
+        if (!isNullOrAir(hand)) this += createEquipmentPacket(id, "MAINHAND", hand!!)
+        if (!isNullOrAir(helmet)) this += createEquipmentPacket(id, "HEAD", helmet!!)
+        if (!isNullOrAir(chestPlate)) this += createEquipmentPacket(id, "CHEST", chestPlate!!)
+        if (!isNullOrAir(leggings)) this += createEquipmentPacket(id, "LEGS", leggings!!)
+        if (!isNullOrAir(boots)) this += createEquipmentPacket(id, "FEET", boots!!)
     }
 
     /**
@@ -71,6 +72,14 @@ data class Equipment(
         if (isNew) return get<Class<*>>(CLASS, "EnumItemSlot").getDeclaredField(type).get(null)
         return when (type) { "HEAD" -> 1; "CHEST" -> 2; "LEGS" -> 3; "FEET" -> 4; else -> 0 }
     }
+
+    /**
+     * Get whether or not a passed [ItemStack] object is null or of type [Material.AIR].
+     *
+     * @param itemStack to check.
+     * @return [Boolean] corresponding boolean.
+     */
+    private fun isNullOrAir(itemStack: ItemStack?): Boolean = itemStack == null || itemStack.type == Material.AIR
 }
 
 /**
