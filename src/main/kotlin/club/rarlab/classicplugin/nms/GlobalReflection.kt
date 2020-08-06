@@ -12,7 +12,7 @@ import java.lang.reflect.Method
  * Object that contains global reflection stuff.
  *  |- Classes, Constructors, Methods & Fields.
  */
-internal object GlobalReflection {
+object GlobalReflection {
     /**
      * [String] precise NMS version in string.
      * <b>EXAMPLE:</b> v1_16_R1
