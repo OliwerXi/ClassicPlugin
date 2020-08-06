@@ -190,9 +190,15 @@ internal object GlobalReflection {
                 "PacketPlayOutPlayerInfo" to packetPlayOutPlayerInfo.getDeclaredConstructor(enumPlayerInfoAction, entityPlayerArray),
                 "PacketPlayOutNamedEntitySpawn" to packetPlayOutNamedEntitySpawn.getDeclaredConstructor(entityHuman),
                 "PacketPlayOutEntityDestroy" to packetPlayOutEntityDestroy.getDeclaredConstructor(IntArray::class.java),
-                "PacketPlayOutEntityEquipment" to packetPlayOutEntityEquipment.getDeclaredConstructor(
-                        Int::class.java, enumItemSlot ?: Int::class.java, minecraftItemStack
-                ),
+                "PacketPlayOutEntityEquipment" to if (VERSION_NUMBER < 161) {
+                    packetPlayOutEntityEquipment.getDeclaredConstructor(
+                            Int::class.java, enumItemSlot ?: Int::class.java, minecraftItemStack
+                    )
+                } else {
+                    packetPlayOutEntityEquipment.getDeclaredConstructor(
+                            Int::class.java, List::class.java
+                    )
+                },
                 "PacketPlayOutScoreboardTeam" to packetPlayOutScoreboardTeam.getDeclaredConstructor(
                         scoreboardTeam, Collection::class.java, Int::class.java
                 )

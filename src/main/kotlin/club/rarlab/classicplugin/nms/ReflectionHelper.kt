@@ -6,6 +6,7 @@ import club.rarlab.classicplugin.nms.GlobalReflection.get
 import com.mojang.authlib.GameProfile
 import io.netty.channel.Channel
 import org.bukkit.entity.Player
+import org.bukkit.inventory.ItemStack
 import java.lang.reflect.Constructor
 import java.lang.reflect.Field
 import java.lang.reflect.Method
@@ -90,6 +91,16 @@ object ReflectionHelper {
      */
     fun getProfile(player: Player): GameProfile {
         return get<Method>(METHOD, "CraftPlayer_getProfile").invoke(getCraftPlayer(player)) as GameProfile
+    }
+
+    /**
+     * Get an NMS ItemStack by original.
+     *
+     * @param original to convert.
+     * @return [Any] corresponding object.
+     */
+    fun getNmsItem(original: ItemStack): Any {
+        return get<Method>(METHOD, "CraftItemStack_asNMSCopy").invoke(null, original)
     }
 
     /**

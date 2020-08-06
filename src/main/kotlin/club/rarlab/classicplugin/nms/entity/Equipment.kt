@@ -1,14 +1,13 @@
 package club.rarlab.classicplugin.nms.entity
 
 import club.rarlab.classicplugin.nms.GlobalReflection.FetchType.CLASS
-import club.rarlab.classicplugin.nms.GlobalReflection.FetchType.METHOD
 import club.rarlab.classicplugin.nms.GlobalReflection.VERSION_NUMBER
 import club.rarlab.classicplugin.nms.GlobalReflection.get
 import club.rarlab.classicplugin.nms.ReflectionHelper.createPacket
+import club.rarlab.classicplugin.nms.ReflectionHelper.getNmsItem
 import org.bukkit.Material
 import org.bukkit.entity.LivingEntity
 import org.bukkit.inventory.ItemStack
-import java.lang.reflect.Method
 
 /**
  * Data class to build [Equipment] for entities and apply them.
@@ -41,11 +40,22 @@ data class Equipment(
      * @param id of the entity that shall be effected.
      */
     fun packets(id: Int): ArrayList<out Any> = arrayListOf<Any>().apply {
-        if (!isNullOrAir(hand)) this += createEquipmentPacket(id, "MAINHAND", hand!!)
-        if (!isNullOrAir(helmet)) this += createEquipmentPacket(id, "HEAD", helmet!!)
-        if (!isNullOrAir(chestPlate)) this += createEquipmentPacket(id, "CHEST", chestPlate!!)
-        if (!isNullOrAir(leggings)) this += createEquipmentPacket(id, "LEGS", leggings!!)
-        if (!isNullOrAir(boots)) this += createEquipmentPacket(id, "FEET", boots!!)
+        if (VERSION_NUMBER < 161) {
+            if (!isNullOrAir(hand)) this += createEquipmentPacket(id, "MAINHAND", hand!!)
+            if (!isNullOrAir(helmet)) this += createEquipmentPacket(id, "HEAD", helmet!!)
+            if (!isNullOrAir(chestPlate)) this += createEquipmentPacket(id, "CHEST", chestPlate!!)
+            if (!isNullOrAir(leggings)) this += createEquipmentPacket(id, "LEGS", leggings!!)
+            if (!isNullOrAir(boots)) this += createEquipmentPacket(id, "FEET", boots!!)
+            return@apply
+        }
+
+        this += createPacket("PacketPlayOutEntityEquipment", id, mutableListOf<Pair<Any, Any>>().apply {
+            if (!isNullOrAir(hand)) this += getEquipmentSlot("MAINHAND", true) to getNmsItem(hand!!)
+            if (!isNullOrAir(helmet)) this +=  getEquipmentSlot("HEAD", true) to getNmsItem(helmet!!)
+            if (!isNullOrAir(chestPlate)) this += getEquipmentSlot("CHEST", true) to getNmsItem(chestPlate!!)
+            if (!isNullOrAir(leggings)) this += getEquipmentSlot("LEGS", true) to getNmsItem(leggings!!)
+            if (!isNullOrAir(boots)) this += getEquipmentSlot("FEET", true) to getNmsItem(boots!!)
+        }.toList())
     }
 
     /**
@@ -57,8 +67,7 @@ data class Equipment(
      * @return [Any] corresponding packet.
      */
     private fun createEquipmentPacket(id: Int, type: String, itemStack: ItemStack): Any {
-        val craftItem = get<Method>(METHOD, "CraftItemStack_asNMSCopy").invoke(null, itemStack)
-        return createPacket("PacketPlayOutEntityEquipment", id, getEquipmentSlot(type, VERSION_NUMBER >= 91), craftItem)
+        return createPacket("PacketPlayOutEntityEquipment", id, getEquipmentSlot(type, VERSION_NUMBER >= 91), getNmsItem(itemStack))
     }
 
     /**
