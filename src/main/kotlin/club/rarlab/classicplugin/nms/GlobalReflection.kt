@@ -175,7 +175,11 @@ internal object GlobalReflection {
                         minecraftServer, worldServer,
                         GameProfile::class.java, playerInteractManager
                 ),
-                "PlayerInteractManager" to playerInteractManager.getDeclaredConstructor(minecraftWorld),
+                "PlayerInteractManager" to if (VERSION_NUMBER < 141) {
+                    playerInteractManager.getDeclaredConstructor(minecraftWorld)
+                } else {
+                    playerInteractManager.getDeclaredConstructor(worldServer)
+                },
                 "Scoreboard" to minecraftScoreboard.getDeclaredConstructor(),
                 "ScoreboardTeam" to scoreboardTeam.getDeclaredConstructor(minecraftScoreboard, String::class.java),
                 /** PACKETS **/
