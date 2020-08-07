@@ -79,7 +79,7 @@ data class Equipment(
      */
     private fun getEquipmentSlot(type: String, isNew: Boolean): Any {
         if (isNew) return get<Class<*>>(CLASS, "EnumItemSlot").getDeclaredField(type).get(null)
-        return when (type) { "HEAD" -> 1; "CHEST" -> 2; "LEGS" -> 3; "FEET" -> 4; else -> 0 }
+        return when (type) { "HEAD" -> 4; "CHEST" -> 3; "LEGS" -> 2; "FEET" -> 1; else -> 0 }
     }
 
     /**
