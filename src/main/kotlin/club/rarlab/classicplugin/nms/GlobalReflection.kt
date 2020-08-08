@@ -229,7 +229,11 @@ object GlobalReflection {
                         Double::class.java, Float::class.java, Float::class.java
                 ),
                 "Entity_getId" to minecraftEntity.getDeclaredMethod("getId"),
-                "Entity_setCustomName" to minecraftEntity.getDeclaredMethod("setCustomName", String::class.java),
+                "Entity_setCustomName" to if (VERSION_NUMBER < 131) {
+                    minecraftEntity.getDeclaredMethod("setCustomName", String::class.java)
+                } else {
+                    minecraftEntity.getDeclaredMethod("setCustomName", iChatBaseComponent)
+                },
                 "Entity_setCustomNameVisible" to minecraftEntity.getDeclaredMethod("setCustomNameVisible", Boolean::class.java),
                 "EntityArmorStand_setInvisible" to entityArmorStand.getDeclaredMethod("setInvisible", Boolean::class.java),
                 "EntityArmorStand_setGravity" to entityArmorStand.getDeclaredMethod("setGravity", Boolean::class.java),

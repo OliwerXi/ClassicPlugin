@@ -3,6 +3,7 @@ package club.rarlab.classicplugin.hologram
 import club.rarlab.classicplugin.extension.*
 import club.rarlab.classicplugin.nms.GlobalReflection.FetchType.CONSTRUCTOR
 import club.rarlab.classicplugin.nms.GlobalReflection.FetchType.METHOD
+import club.rarlab.classicplugin.nms.GlobalReflection.VERSION_NUMBER
 import club.rarlab.classicplugin.nms.GlobalReflection.get
 import club.rarlab.classicplugin.nms.ReflectionHelper
 import club.rarlab.classicplugin.nms.ReflectionHelper.createPacket
@@ -79,7 +80,10 @@ class HologramLine(location: Location, line: String) {
         internal fun generateLine(loc: Location, line: String): Any = get<Constructor<*>>(CONSTRUCTOR, "EntityArmorStand").newInstance(
                 ReflectionHelper.getWorldServer(loc.world!!), loc.x, loc.y, loc.z
         ).apply {
-            get<Method>(METHOD, "Entity_setCustomName").invoke(this, line.colourise())
+            get<Method>(METHOD, "Entity_setCustomName").invoke(this,
+                    if (VERSION_NUMBER < 131) line.colourise()
+                    else get<Method>(METHOD, "ChatSerializer_a").invoke(null, line.colourise())
+            )
             get<Method>(METHOD, "Entity_setCustomNameVisible").invoke(this, true)
             get<Method>(METHOD, "EntityArmorStand_setInvisible").invoke(this, true)
             get<Method>(METHOD, "EntityArmorStand_setGravity").invoke(this, false)
