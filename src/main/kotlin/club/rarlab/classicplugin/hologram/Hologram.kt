@@ -86,7 +86,8 @@ class HologramLine(location: Location, line: String) {
             )
             get<Method>(METHOD, "Entity_setCustomNameVisible").invoke(this, true)
             get<Method>(METHOD, "EntityArmorStand_setInvisible").invoke(this, true)
-            get<Method>(METHOD, "EntityArmorStand_setGravity").invoke(this, false)
+            if (VERSION_NUMBER < 101) get<Method>(METHOD, "EntityArmorStand_setGravity").invoke(this, false)
+            else get<Method>(METHOD, "Entity_setNoGravity").invoke(this, true)
         }
     }
 }

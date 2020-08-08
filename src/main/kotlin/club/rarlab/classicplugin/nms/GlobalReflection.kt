@@ -236,13 +236,18 @@ object GlobalReflection {
                 },
                 "Entity_setCustomNameVisible" to minecraftEntity.getDeclaredMethod("setCustomNameVisible", Boolean::class.java),
                 "EntityArmorStand_setInvisible" to entityArmorStand.getDeclaredMethod("setInvisible", Boolean::class.java),
-                "EntityArmorStand_setGravity" to entityArmorStand.getDeclaredMethod("setGravity", Boolean::class.java),
                 "EntityHuman_getProfile" to entityHuman.getDeclaredMethod("getProfile"),
                 "ChatSerializer_a" to chatSerializer.getDeclaredMethod("a", String::class.java),
                 "CraftItemStack_asNMSCopy" to craftItemStack.getDeclaredMethod("asNMSCopy", ItemStack::class.java),
                 /** PACKETS **/
                 "PlayerConnection_sendPacket" to playerConnection.getDeclaredMethod("sendPacket", packet)
         ))
+
+        if (VERSION_NUMBER < 101) {
+            methods["EntityArmorStand_setGravity"] = entityArmorStand.getDeclaredMethod("setGravity", Boolean::class.java)
+        } else {
+            methods["Entity_setNoGravity"] = minecraftEntity.getDeclaredMethod("setNoGravity", Boolean::class.java)
+        }
 
         // fields
         fields.putAll(mapOf(
