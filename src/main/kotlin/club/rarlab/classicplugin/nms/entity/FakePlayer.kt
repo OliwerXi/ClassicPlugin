@@ -48,11 +48,6 @@ class FakePlayer private constructor(val owner: UUID, nameTag: String) {
     private val hologram: HologramLine
 
     /**
-     * [Scoreboard] instance to be used for name tag.
-     */
-    private val scoreboard: Scoreboard = Bukkit.getScoreboardManager()!!.newScoreboard
-
-    /**
      * [Any] of the nms ScoreboardTeam object.
      */
     private val scoreboardTeam: Any
@@ -119,7 +114,7 @@ class FakePlayer private constructor(val owner: UUID, nameTag: String) {
         sendPacket(createPacket("PacketPlayOutNamedEntitySpawn", this.entity), *players)
         equipment?.packets(getEntityId() ?: return)?.forEach { packet -> sendPacket(packet, *players) }
 
-        players.forEach { player -> player.scoreboard = this.scoreboard }
+        players.forEach { player -> player.scoreboard = SCOREBOARD }
         sendPacket(createPacket("PacketPlayOutScoreboardTeam", this.scoreboardTeam, listOf(this.preciseName), 3), *players)
         hologram.showTo(*players)
 
@@ -181,7 +176,7 @@ class FakePlayer private constructor(val owner: UUID, nameTag: String) {
                 get<Constructor<*>>(CONSTRUCTOR, "PlayerInteractManager").newInstance(worldServer)
         ).also { entity -> this.entity = entity }
 
-        val bukkitTeam = scoreboard.registerNewTeam("roam_${player.name}").apply {
+        val bukkitTeam = SCOREBOARD.registerNewTeam("roam_${player.name}").apply {
             if (VERSION_NUMBER >= 91) {
                 this.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER)
                 return@apply
@@ -199,6 +194,8 @@ class FakePlayer private constructor(val owner: UUID, nameTag: String) {
      * Global Stuff.
      */
     companion object {
+        internal val SCOREBOARD: Scoreboard = Bukkit.getScoreboardManager()!!.newScoreboard
+
         /**
          * The corresponding MinecraftServer object.
          */
