@@ -113,6 +113,7 @@ object GlobalReflection {
         val entityLiving = getNmsClass("EntityLiving")
         val playerInteractManager = getNmsClass("PlayerInteractManager")
         val iChatBaseComponent = getNmsClass("IChatBaseComponent")
+        val chatComponentText = getNmsClass("ChatComponentText")
         val chatSerializer = if (VERSION_NUMBER > 81) getNmsClass("IChatBaseComponent\$ChatSerializer") else getNmsClass("ChatSerializer")
         val craftItemStack = getBukkitClass("inventory.CraftItemStack")
         val minecraftItemStack = getNmsClass("ItemStack")
@@ -150,6 +151,7 @@ object GlobalReflection {
                 "EntityLiving" to entityLiving,
                 "PlayerInteractManager" to playerInteractManager,
                 "IChatBaseComponent" to iChatBaseComponent,
+                "ChatComponentText" to chatComponentText,
                 "ChatSerializer" to chatSerializer,
                 "CraftItemStack" to craftItemStack,
                 "ItemStack" to minecraftItemStack,
@@ -193,6 +195,7 @@ object GlobalReflection {
                 },
                 "Scoreboard" to minecraftScoreboard.getDeclaredConstructor(),
                 "ScoreboardTeam" to scoreboardTeam.getDeclaredConstructor(minecraftScoreboard, String::class.java),
+                "ChatComponentText" to chatComponentText.getDeclaredConstructor(String::class.java),
                 /** PACKETS **/
                 "PacketPlayOutTitle" to packetPlayOutTitle.getDeclaredConstructor(
                         enumTitleAction, iChatBaseComponent, Int::class.java,

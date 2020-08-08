@@ -82,7 +82,7 @@ class HologramLine(location: Location, line: String) {
         ).apply {
             get<Method>(METHOD, "Entity_setCustomName").invoke(this,
                     if (VERSION_NUMBER < 131) line.colourise()
-                    else get<Method>(METHOD, "ChatSerializer_a").invoke(null, line.colourise())
+                    else get<Constructor<*>>(CONSTRUCTOR, "ChatComponentText").newInstance(line.colourise())
             )
             get<Method>(METHOD, "Entity_setCustomNameVisible").invoke(this, true)
             get<Method>(METHOD, "EntityArmorStand_setInvisible").invoke(this, true)
