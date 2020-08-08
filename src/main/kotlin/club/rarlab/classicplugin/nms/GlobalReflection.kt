@@ -109,6 +109,8 @@ object GlobalReflection {
         val entityPlayer = getNmsClass("EntityPlayer")
         val entityPlayerArray = (newInstance(entityPlayer, 0) as Array<*>)::class.java
         val entityHuman = getNmsClass("EntityHuman")
+        val entityArmorStand = getNmsClass("EntityArmorStand")
+        val entityLiving = getNmsClass("EntityLiving")
         val playerInteractManager = getNmsClass("PlayerInteractManager")
         val iChatBaseComponent = getNmsClass("IChatBaseComponent")
         val chatSerializer = if (VERSION_NUMBER > 81) getNmsClass("IChatBaseComponent\$ChatSerializer") else getNmsClass("ChatSerializer")
@@ -124,6 +126,8 @@ object GlobalReflection {
         val packetPlayOutEntityDestroy = getNmsClass("PacketPlayOutEntityDestroy")
         val packetPlayOutEntityEquipment = getNmsClass("PacketPlayOutEntityEquipment")
         val packetPlayOutScoreboardTeam = getNmsClass("PacketPlayOutScoreboardTeam")
+        val packetPlayOutSpawnEntityLiving = getNmsClass("PacketPlayOutSpawnEntityLiving")
+        val packetPlayOutEntityTeleport = getNmsClass("PacketPlayOutEntityTeleport")
         val enumTitleAction = if (VERSION_NUMBER > 81) getNmsClass("PacketPlayOutTitle\$EnumTitleAction") else getNmsClass("EnumTitleAction")
         val enumPlayerInfoAction = if (VERSION_NUMBER > 81) getNmsClass("PacketPlayOutPlayerInfo\$EnumPlayerInfoAction") else getNmsClass("EnumPlayerInfoAction")
         val enumItemSlot = if (VERSION_NUMBER >= 91) getNmsClass("EnumItemSlot") else null
@@ -142,6 +146,8 @@ object GlobalReflection {
                 "Entity" to minecraftEntity,
                 "EntityPlayer" to entityPlayer,
                 "EntityHuman" to entityHuman,
+                "EntityArmorStand" to entityArmorStand,
+                "EntityLiving" to entityLiving,
                 "PlayerInteractManager" to playerInteractManager,
                 "IChatBaseComponent" to iChatBaseComponent,
                 "ChatSerializer" to chatSerializer,
@@ -158,6 +164,8 @@ object GlobalReflection {
                 "PacketPlayOutEntityDestroy" to packetPlayOutEntityDestroy,
                 "PacketPlayOutEntityEquipment" to packetPlayOutEntityEquipment,
                 "PacketPlayOutScoreboardTeam" to packetPlayOutScoreboardTeam,
+                "PacketPlayOutSpawnEntityLiving" to packetPlayOutSpawnEntityLiving,
+                "PacketPlayOutEntityTeleport" to packetPlayOutEntityTeleport,
                 "EnumTitleAction" to enumTitleAction,
                 "EnumPlayerInfoAction" to enumPlayerInfoAction,
                 "PlayerConnection" to playerConnection,
@@ -174,6 +182,9 @@ object GlobalReflection {
                 "EntityPlayer" to entityPlayer.getDeclaredConstructor(
                         minecraftServer, worldServer,
                         GameProfile::class.java, playerInteractManager
+                ),
+                "EntityArmorStand" to entityArmorStand.getDeclaredConstructor(
+                        minecraftWorld, Double::class.java, Double::class.java, Double::class.java
                 ),
                 "PlayerInteractManager" to if (VERSION_NUMBER < 141) {
                     playerInteractManager.getDeclaredConstructor(minecraftWorld)
@@ -201,7 +212,9 @@ object GlobalReflection {
                 },
                 "PacketPlayOutScoreboardTeam" to packetPlayOutScoreboardTeam.getDeclaredConstructor(
                         scoreboardTeam, Collection::class.java, Int::class.java
-                )
+                ),
+                "PacketPlayOutSpawnEntityLiving" to packetPlayOutSpawnEntityLiving.getDeclaredConstructor(entityLiving),
+                "PacketPlayOutEntityTeleport" to packetPlayOutEntityTeleport.getDeclaredConstructor(minecraftEntity)
         ))
 
         // methods
@@ -216,6 +229,10 @@ object GlobalReflection {
                         Double::class.java, Float::class.java, Float::class.java
                 ),
                 "Entity_getId" to minecraftEntity.getDeclaredMethod("getId"),
+                "Entity_setCustomName" to minecraftEntity.getDeclaredMethod("setCustomName", String::class.java),
+                "Entity_setCustomNameVisible" to minecraftEntity.getDeclaredMethod("setCustomNameVisible", Boolean::class.java),
+                "EntityArmorStand_setInvisible" to entityArmorStand.getDeclaredMethod("setInvisible", Boolean::class.java),
+                "EntityArmorStand_setGravity" to entityArmorStand.getDeclaredMethod("setGravity", Boolean::class.java),
                 "EntityHuman_getProfile" to entityHuman.getDeclaredMethod("getProfile"),
                 "ChatSerializer_a" to chatSerializer.getDeclaredMethod("a", String::class.java),
                 "CraftItemStack_asNMSCopy" to craftItemStack.getDeclaredMethod("asNMSCopy", ItemStack::class.java),
@@ -228,7 +245,11 @@ object GlobalReflection {
                 /** GENERAL **/
                 "EntityPlayer_playerConnection" to entityPlayer.getDeclaredField("playerConnection"),
                 "PlayerConnection_networkManager" to playerConnection.getDeclaredField("networkManager"),
-                "NetworkManager_channel" to networkManager.getDeclaredField(when (VERSION_NUMBER) { 81 -> "i"; 82 -> "k"; else -> "channel" })
+                "NetworkManager_channel" to networkManager.getDeclaredField(when (VERSION_NUMBER) { 81 -> "i"; 82 -> "k"; else -> "channel" }),
+                /** PACKETS **/
+                "PacketPlayOutEntityTeleport_x" to packetPlayOutEntityTeleport.getDeclaredField("b"),
+                "PacketPlayOutEntityTeleport_y" to packetPlayOutEntityTeleport.getDeclaredField("c"),
+                "PacketPlayOutEntityTeleport_z" to packetPlayOutEntityTeleport.getDeclaredField("d")
         ))
     }
 }

@@ -5,6 +5,7 @@ import club.rarlab.classicplugin.nms.GlobalReflection.VERSION_NUMBER
 import club.rarlab.classicplugin.nms.GlobalReflection.get
 import com.mojang.authlib.GameProfile
 import io.netty.channel.Channel
+import org.bukkit.World
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 import java.lang.reflect.Constructor
@@ -80,6 +81,17 @@ object ReflectionHelper {
      */
     fun getWorldServer(player: Player): Any {
         val craftWorld = get<Class<*>>(CLASS, "CraftWorld").cast(player.world)
+        return get<Method>(METHOD, "CraftWorld_Handle").invoke(craftWorld)
+    }
+
+    /**
+     * Get a WorldServer object by a [org.bukkit.World].
+     *
+     * @param world to convert.
+     * @return [Any] corresponding WorldServer object.
+     */
+    fun getWorldServer(world: World): Any {
+        val craftWorld = get<Class<*>>(CLASS, "CraftWorld").cast(world)
         return get<Method>(METHOD, "CraftWorld_Handle").invoke(craftWorld)
     }
 
