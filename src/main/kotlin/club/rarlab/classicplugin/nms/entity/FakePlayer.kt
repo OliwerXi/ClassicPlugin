@@ -48,11 +48,6 @@ class FakePlayer private constructor(val owner: UUID, nameTag: String) {
     private val hologram: HologramLine
 
     /**
-     * [Any] of the nms ScoreboardTeam object.
-     */
-    private val scoreboardTeam: Any
-
-    /**
      * [Equipment] of the [FakePlayer].
      */
     private var equipment: Equipment? = null
@@ -115,7 +110,7 @@ class FakePlayer private constructor(val owner: UUID, nameTag: String) {
         equipment?.packets(getEntityId() ?: return)?.forEach { packet -> sendPacket(packet, *players) }
 
         players.forEach { player -> player.scoreboard = SCOREBOARD }
-        sendPacket(createPacket("PacketPlayOutScoreboardTeam", this.scoreboardTeam, listOf(this.preciseName), 3), *players)
+        sendPacket(createPacket("PacketPlayOutScoreboardTeam", TEAM, listOf(this.preciseName), 3), *players)
         hologram.showTo(*players)
 
         schedule(40, false, Runnable {
@@ -176,17 +171,6 @@ class FakePlayer private constructor(val owner: UUID, nameTag: String) {
                 get<Constructor<*>>(CONSTRUCTOR, "PlayerInteractManager").newInstance(worldServer)
         ).also { entity -> this.entity = entity }
 
-        val bukkitTeam = SCOREBOARD.registerNewTeam("roam_${player.name}").apply {
-            if (VERSION_NUMBER >= 91) {
-                this.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER)
-                return@apply
-            }
-            this.nameTagVisibility = NameTagVisibility.NEVER
-        }
-
-        val nmsScoreboard = get<Constructor<*>>(CONSTRUCTOR, "Scoreboard").newInstance()
-        this.scoreboardTeam = get<Constructor<*>>(CONSTRUCTOR, "ScoreboardTeam").newInstance(nmsScoreboard, bukkitTeam.name)
-
         Array.set(entityArray, 0, this.entity)
     }
 
@@ -194,7 +178,26 @@ class FakePlayer private constructor(val owner: UUID, nameTag: String) {
      * Global Stuff.
      */
     companion object {
-        internal val SCOREBOARD: Scoreboard = Bukkit.getScoreboardManager()!!.newScoreboard
+        /**
+         * [Scoreboard] object to hold roaming players.
+         */
+        internal val SCOREBOARD: Scoreboard = Bukkit.getScoreboardManager()!!.newScoreboard.apply {
+            registerNewTeam("ROAM").run {
+                if (VERSION_NUMBER >= 91) {
+                    this.setOption(Team.Option.NAME_TAG_VISIBILITY, Team.OptionStatus.NEVER)
+                    return@apply
+                }
+                this.nameTagVisibility = NameTagVisibility.NEVER
+            }
+        }
+
+        /**
+         * [Any] NMS team to be used when sending corresponding packets.
+         */
+        internal val TEAM: Any by lazy {
+            val nmsScoreboard = get<Constructor<*>>(CONSTRUCTOR, "Scoreboard").newInstance()
+            get<Constructor<*>>(CONSTRUCTOR, "ScoreboardTeam").newInstance(nmsScoreboard, "ROAM")
+        }
 
         /**
          * The corresponding MinecraftServer object.
